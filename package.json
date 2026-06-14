@@ -1,0 +1,28 @@
+{
+  "name": "curvana",
+  "version": "0.1.0",
+  "description": "Simulador interactivo de parametrizaciones de curvas en 2D y 3D para Cálculo 3 multivariable (campos escalares y vectoriales).",
+  "type": "module",
+  "author": "José Labarca",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "katex": "^0.16.11",
+    "mathjs": "^13.2.0",
+    "tesseract.js": "^5.1.1",
+    "three": "^0.169.0"
+  },
+  "devDependencies": {
+    "@types/katex": "^0.16.7",
+    "@types/three": "^0.169.0",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.1",
+    "vitest": "^2.1.5"
+  }
+}
