@@ -1,6 +1,10 @@
+<p align="right"><b>🇪🇸 Español</b> · <a href="README.en.md">🇬🇧 English</a></p>
+
 # 〜 Curvana
 
 **Simulador interactivo de parametrizaciones de curvas en 2D y 3D** para Cálculo 3 multivariable (Mate 023).
+
+![Curvana](docs/screenshot.png)
 
 Escribe una curva (en cartesianas, paramétrica o desde una biblioteca), míra cómo el parámetro `t`
 la **construye** moviendo un slider, y conéctala con los temas centrales del curso: **integrales de
