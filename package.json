@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "description": "Simulador interactivo de parametrizaciones de curvas en 2D y 3D para Cálculo 3 multivariable (campos escalares y vectoriales).",
   "type": "module",
-  "author": "José Labarca",
+  "author": {
+    "name": "José Labarca",
+    "email": "kegouro@users.noreply.github.com"
+  },
   "license": "MIT",
   "repository": "https://github.com/kegouro/curvana",
   "main": "electron/main.cjs",
