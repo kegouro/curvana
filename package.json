@@ -5,6 +5,7 @@
   "type": "module",
   "author": "José Labarca",
   "license": "MIT",
+  "repository": "https://github.com/kegouro/curvana",
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
@@ -37,6 +38,7 @@
     "appId": "cl.joselabarca.curvana",
     "productName": "Curvana",
     "copyright": "Copyright © 2026 José Labarca",
+    "publish": [{ "provider": "github", "owner": "kegouro", "repo": "curvana" }],
     "files": ["dist/**", "electron/**"],
     "directories": {
       "output": "release"
