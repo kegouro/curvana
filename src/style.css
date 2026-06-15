@@ -1,0 +1,424 @@
+/* Curvana — tema verde "pizarra". */
+:root {
+  --bg: #08120c;
+  --panel: #0d1a12;
+  --panel-2: #102216;
+  --line: #1e3a2a;
+  --green: #a3e635;
+  --green-dim: #4d7c0f;
+  --amber: #fbbf24;
+  --text: #d7ead9;
+  --muted: #7c9a85;
+  --danger: #f87171;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+#app,
+.app {
+  height: 100vh;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+/* ---------- Panel de control ---------- */
+.panel {
+  width: 340px;
+  flex-shrink: 0;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #14532d, #1a2e1a);
+  border: 1px solid var(--green-dim);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  color: var(--green);
+}
+.brand {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--green);
+}
+.brand-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.section {
+  margin-bottom: 20px;
+}
+.section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.seg,
+.tabs {
+  display: flex;
+  gap: 6px;
+}
+.seg button,
+.tabs button {
+  flex: 1;
+  padding: 8px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.15s;
+}
+.tabs button {
+  font-size: 12px;
+  padding: 7px 4px;
+}
+.seg button:hover,
+.tabs button:hover {
+  border-color: var(--green-dim);
+}
+.seg button.active,
+.tabs button.active {
+  background: var(--green);
+  color: #07150a;
+  border-color: var(--green);
+  font-weight: 700;
+}
+
+.pane {
+  margin-top: 10px;
+}
+
+input[type='text'],
+input[type='number'],
+select {
+  width: 100%;
+  padding: 9px 10px;
+  background: #08130c;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--green);
+}
+
+button.primary {
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px;
+  background: var(--green);
+  color: #07150a;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+button.primary:hover {
+  filter: brightness(1.08);
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+.field span {
+  width: 42px;
+  color: var(--muted);
+  font-size: 12px;
+  font-family: ui-monospace, monospace;
+}
+.range-row {
+  display: flex;
+  gap: 8px;
+}
+.field.small span {
+  width: 36px;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  margin: 8px 0;
+  cursor: pointer;
+}
+.check input {
+  width: auto;
+  accent-color: var(--green);
+}
+.subfield {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 10px 24px;
+}
+.subfield.vec input {
+  padding: 7px;
+}
+.subfield button {
+  padding: 0 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.msg {
+  font-size: 12px;
+  margin-top: 8px;
+  min-height: 16px;
+  line-height: 1.4;
+}
+.msg.ok {
+  color: var(--green);
+}
+.msg.error {
+  color: var(--danger);
+}
+
+.ocr {
+  margin-top: 12px;
+}
+.ocr-drop {
+  border: 1px dashed var(--green-dim);
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  transition: 0.15s;
+}
+.ocr-drop.drag {
+  background: #11240f;
+  border-color: var(--green);
+}
+.link {
+  color: var(--green);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.ocr-status {
+  font-size: 11px;
+  color: var(--amber);
+  margin-top: 6px;
+  min-height: 14px;
+}
+
+.signature {
+  margin-top: 24px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--muted);
+}
+.signature b {
+  color: var(--green);
+}
+
+/* ---------- Visor ---------- */
+.viewer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.viewer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.equations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 15px;
+}
+.eq-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.eq-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+.eq-body {
+  color: var(--text);
+}
+.viewer-actions {
+  display: flex;
+  gap: 6px;
+}
+button.ghost {
+  padding: 6px 12px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+}
+button.ghost:hover {
+  border-color: var(--green);
+}
+
+.viewport {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+.viewport canvas {
+  display: block;
+}
+
+/* ---------- Componentes ---------- */
+.components {
+  display: flex;
+  gap: 8px;
+  padding: 8px 14px;
+  height: 110px;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+}
+.comp-cell {
+  flex: 1;
+  position: relative;
+  background: #07130b;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.comp-cell canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.comp-label {
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  font-size: 11px;
+  font-family: ui-monospace, monospace;
+  font-weight: 700;
+}
+
+/* ---------- Transporte ---------- */
+.transport {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--panel-2);
+  border-top: 1px solid var(--line);
+}
+.transport .play {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--green-dim);
+  background: var(--panel);
+  color: var(--green);
+  font-size: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.transport .play.on {
+  background: var(--green);
+  color: #07150a;
+}
+.transport .scrub {
+  flex: 1;
+  accent-color: var(--green);
+  padding: 0;
+  background: transparent;
+}
+.transport .speed {
+  width: auto;
+  flex-shrink: 0;
+}
+.readouts {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.chip {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-family: ui-monospace, monospace;
+  white-space: nowrap;
+}
+.chip b {
+  color: var(--green);
+  margin-right: 3px;
+}
+
+@media (max-width: 900px) {
+  .workspace {
+    flex-direction: column;
+  }
+  .panel {
+    width: 100%;
+    max-height: 45vh;
+  }
+  .readouts {
+    display: none;
+  }
+}

@@ -1,6 +1,6 @@
 // Envoltura de math.js: compila expresiones matemáticas con validación
 // y mensajes de error amigables. Núcleo puro, sin DOM.
-import { create, all } from 'mathjs';
+import { create, all, type EvalFunction } from 'mathjs';
 
 const math = create(all, {});
 
@@ -28,7 +28,7 @@ export function compileExpr(source: string, allowedVars: string[]): CompiledExpr
     throw new ParseError('La expresión está vacía.');
   }
 
-  let code: ReturnType<typeof math.compile>;
+  let code: EvalFunction;
   try {
     code = math.compile(trimmed);
   } catch {
