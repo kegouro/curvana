@@ -64,6 +64,28 @@ El repositorio incluye un workflow (`.github/workflows/deploy.yml`) que corre lo
 publica `dist/` en GitHub Pages en cada push a `main`. Solo activa **Pages → Source: GitHub Actions** en
 la configuración del repositorio.
 
+## 🖥️ Apps de escritorio (Mac / Windows / Linux)
+
+Curvana también se empaqueta como app nativa con **Electron**.
+
+```bash
+npm run app        # corre la app de escritorio localmente
+npm run dist       # genera el instalador para TU sistema operativo (en release/)
+npm run dist:mac   # .dmg + .zip  (solo en macOS)
+npm run dist:win   # .exe (NSIS) + portable  (solo en Windows)
+npm run dist:linux # .AppImage + .deb  (solo en Linux)
+```
+
+Cada instalador debe construirse en su propio sistema operativo. Para generar los **tres a la vez**,
+el repositorio incluye el workflow `.github/workflows/package.yml`, que compila en runners nativos de
+GitHub (macOS, Windows y Ubuntu) al hacer push de un tag `v*` (o manualmente desde la pestaña Actions):
+
+```bash
+git tag v0.1.0 && git push --tags   # dispara el empaquetado en los tres sistemas
+```
+
+Los instaladores quedan como artefactos del workflow y, en tags, adjuntos a una GitHub Release.
+
 ## 🧪 Correctitud
 
 El núcleo matemático está cubierto con tests que comparan contra resultados conocidos: curvatura de la

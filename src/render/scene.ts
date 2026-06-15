@@ -15,7 +15,8 @@ export class Viewport {
 
   constructor(container: HTMLElement) {
     this.container = container;
-    this.scene.background = new THREE.Color(0x0a140e);
+    // Fondo gris-pizarra neutro: hace que los ejes y la grilla verde no se fundan con él.
+    this.scene.background = new THREE.Color(0x131a23);
 
     const w = container.clientWidth || 800;
     const h = container.clientHeight || 600;
@@ -36,14 +37,20 @@ export class Viewport {
     dir.position.set(5, 10, 7);
     this.scene.add(dir);
 
-    this.grid = new THREE.GridHelper(20, 20, 0x1e3a2a, 0x14241a);
+    this.grid = new THREE.GridHelper(20, 20, 0x2c4a38, 0x1f3128);
     (this.grid.material as THREE.Material).transparent = true;
     (this.grid.material as THREE.Material).opacity = 0.5;
     // GridHelper está en el plano XZ; lo giramos al plano XY (matemático).
     this.grid.rotation.x = Math.PI / 2;
     this.scene.add(this.grid);
 
+    // Ejes con colores de alto contraste sobre el fondo pizarra.
     this.axes = new THREE.AxesHelper(4);
+    this.axes.setColors(
+      new THREE.Color(0xff7a7a), // X — rojo
+      new THREE.Color(0x86efac), // Y — verde
+      new THREE.Color(0x7dd3fc), // Z — azul
+    );
     this.scene.add(this.axes);
 
     window.addEventListener('resize', () => this.resize());
