@@ -65,8 +65,7 @@ npm run preview  # previsualiza el build
 ## 🌐 Deploy a GitHub Pages
 
 El repositorio incluye un workflow (`.github/workflows/deploy.yml`) que corre los tests, hace el build y
-publica `dist/` en GitHub Pages en cada push a `main`. Solo activa **Pages → Source: GitHub Actions** en
-la configuración del repositorio.
+publica `dist/` en GitHub Pages en cada push a `main`. 
 
 ## 🖥️ Apps de escritorio (Mac / Windows / Linux)
 
