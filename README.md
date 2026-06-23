@@ -105,4 +105,6 @@ MIT © 2026 **José Labarca**.
 
 ---
 
+[![DOI](https://zenodo.org/badge/1269645708.svg)](https://zenodo.org/badge/latestdoi/1269645708)
+
 <sub>Parte del **[Pharos Project](https://kegouro.github.io)** — infraestructura científica y educativa sin barreras de entrada. · José Labarca Baeza</sub>
