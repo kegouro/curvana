@@ -4,6 +4,8 @@
 
 **Simulador interactivo de parametrizaciones de curvas en 2D y 3D** para Cálculo 3 multivariable (Mate 023).
 
+[![Probar en vivo](https://img.shields.io/badge/▶_Probar_en_vivo-4ade80?style=for-the-badge&logoColor=white)](https://kegouro.github.io/curvana/)
+
 ![Curvana](docs/screenshot.png)
 
 Escribe una curva (en cartesianas, paramétrica o desde una biblioteca), míra cómo el parámetro `t`
