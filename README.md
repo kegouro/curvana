@@ -102,3 +102,7 @@ Vite · TypeScript · Three.js · math.js · KaTeX · Tesseract.js · Vitest.
 ## 📄 Licencia
 
 MIT © 2026 **José Labarca**.
+
+---
+
+<sub>Parte del **[Pharos Project](https://kegouro.github.io)** — infraestructura científica y educativa sin barreras de entrada. · José Labarca Baeza</sub>
