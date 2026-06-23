@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "Si usas este software, por favor cítalo."
+title: "Curvana — parametrizaciones de curvas 2D/3D"
+abstract: "Simulador interactivo de parametrizaciones de curvas 2D/3D, campos escalares y vectoriales e integrales de línea."
+type: software
+authors:
+  - family-names: "Labarca Baeza"
+    given-names: "José"
+    orcid: "https://orcid.org/0009-0006-8890-4048"
+    affiliation: "Universidad Técnica Federico Santa María, Valparaíso, Chile"
+repository-code: "https://github.com/kegouro/curvana"
+url: "https://kegouro.github.io"
+license: MIT
+keywords:
+  - parametric curves
+  - vector calculus
+  - line integrals
+  - physics education
+  - visualization
