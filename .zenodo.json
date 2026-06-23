@@ -1,0 +1,28 @@
+{
+  "title": "Curvana — parametrizaciones de curvas 2D/3D",
+  "description": "Simulador interactivo de parametrizaciones de curvas 2D/3D, campos escalares y vectoriales e integrales de línea.",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "creators": [
+    {
+      "name": "Labarca Baeza, José",
+      "orcid": "0009-0006-8890-4048",
+      "affiliation": "Universidad Técnica Federico Santa María, Valparaíso, Chile"
+    }
+  ],
+  "keywords": [
+    "parametric curves",
+    "vector calculus",
+    "line integrals",
+    "physics education",
+    "visualization"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isPartOf",
+      "identifier": "https://kegouro.github.io",
+      "scheme": "url"
+    }
+  ]
+}
