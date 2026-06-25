@@ -1,6 +1,10 @@
 <p align="right"><b>🇪🇸 Español</b> · <a href="README.en.md">🇬🇧 English</a></p>
 
-# 〜 Curvana
+<p align="center">
+  <img src="docs/banner.png" alt="Curvana Banner" width="100%">
+</p>
+
+# Curvana
 
 **Simulador interactivo de parametrizaciones de curvas en 2D y 3D** para Cálculo 3 multivariable (Mate 023).
 

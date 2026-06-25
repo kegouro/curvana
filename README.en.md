@@ -1,6 +1,10 @@
 <p align="right"><a href="README.md">🇪🇸 Español</a> · <b>🇬🇧 English</b></p>
 
-# 〜 Curvana
+<p align="center">
+  <img src="docs/banner.png" alt="Curvana Banner" width="100%">
+</p>
+
+# Curvana
 
 **Interactive simulator of 2D and 3D curve parametrizations** for multivariable Calculus III.
 

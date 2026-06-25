@@ -165,7 +165,9 @@ function trim(v: number): string {
 
 const TEMPLATE = (libOptions: string): string => `
   <div class="brand-row">
-    <div class="logo">〜</div>
+    <div class="logo">
+      <img src="/logo.svg" alt="Curvana Logo" style="width: 28px; height: 28px;" />
+    </div>
     <div>
       <div class="brand">Curvana</div>
       <div class="brand-sub">Simulador de parametrizaciones</div>
