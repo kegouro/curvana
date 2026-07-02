@@ -43,7 +43,7 @@ function normalize(input: string): string {
 
 function splitEquations(input: string): string[] {
   return input
-    .split(/[,;\n]|∩/)
+    .split(/[,;\n]|∩|\s+(?=[xyz]\s*=)/)
     .map((s) => s.trim())
     .filter((s) => s.length > 0);
 }
@@ -112,27 +112,27 @@ interface QuadCoeffs {
   isQuadratic: boolean;
 }
 
-/** Extrae coeficientes de F(x,y)=0 y verifica que sea realmente un polinomio de grado ≤ 2. */
-function quadCoeffsXY(F: string): QuadCoeffs | null {
+/** Extrae coeficientes de F(u,v)=0 y verifica que sea realmente un polinomio de grado ≤ 2. */
+function quadCoeffs(F: string, u: 'x' | 'y' | 'z', v: 'x' | 'y' | 'z'): QuadCoeffs | null {
   try {
-    const at = (node: any, x: number, y: number) => node.evaluate({ x, y });
+    const at = (node: any, uVal: number, vVal: number) => node.evaluate({ [u]: uVal, [v]: vVal });
     const Fn = math.parse(F);
-    const fx = math.derivative(Fn, 'x');
-    const fy = math.derivative(Fn, 'y');
-    const fxx = math.derivative(fx, 'x');
-    const fyy = math.derivative(fy, 'y');
-    const fxy = math.derivative(fx, 'y');
+    const fu = math.derivative(Fn, u);
+    const fv = math.derivative(Fn, v);
+    const fuu = math.derivative(fu, u);
+    const fvv = math.derivative(fv, v);
+    const fuv = math.derivative(fu, v);
 
-    const c20 = at(fxx, 0, 0) / 2;
-    const c02 = at(fyy, 0, 0) / 2;
-    const c11 = at(fxy, 0, 0);
-    const c10 = at(fx, 0, 0);
-    const c01 = at(fy, 0, 0);
+    const c20 = at(fuu, 0, 0) / 2;
+    const c02 = at(fvv, 0, 0) / 2;
+    const c11 = at(fuv, 0, 0);
+    const c10 = at(fu, 0, 0);
+    const c01 = at(fv, 0, 0);
     const c00 = at(Fn, 0, 0);
 
     // Verificación: el modelo cuadrático debe coincidir con F en varios puntos.
-    const model = (x: number, y: number) =>
-      c20 * x * x + c02 * y * y + c11 * x * y + c10 * x + c01 * y + c00;
+    const model = (uVal: number, vVal: number) =>
+      c20 * uVal * uVal + c02 * vVal * vVal + c11 * uVal * vVal + c10 * uVal + c01 * vVal + c00;
     const samples: [number, number][] = [
       [1.3, -0.7],
       [-2.1, 1.9],
@@ -140,9 +140,9 @@ function quadCoeffsXY(F: string): QuadCoeffs | null {
       [-1.7, -1.1],
     ];
     let isQuadratic = true;
-    for (const [x, y] of samples) {
-      const actual = at(Fn, x, y);
-      if (!Number.isFinite(actual) || Math.abs(actual - model(x, y)) > 1e-6 * (1 + Math.abs(actual))) {
+    for (const [uVal, vVal] of samples) {
+      const actual = at(Fn, uVal, vVal);
+      if (!Number.isFinite(actual) || Math.abs(actual - model(uVal, vVal)) > 1e-6 * (1 + Math.abs(actual))) {
         isQuadratic = false;
         break;
       }
@@ -292,52 +292,77 @@ function recognizePair(eqs: Eq[]): RecognizeResult {
     }
   }
 
-  // Patrón: un cilindro/círculo x²+y²=R y la otra ecuación da z = g(x,y) (o z = cte).
-  let circleEq: Eq | null = null;
-  let zEq: { variable: 'z'; f: string } | null = null;
+  // Patrón: cilindro/círculo en algún plano coordenado con la otra ecuación explícita en la tercera variable.
   for (let i = 0; i < eqs.length; i++) {
-    const ex = explicits[i];
-    if (ex && ex.variable === 'z') {
-      zEq = { variable: 'z', f: ex.f };
-    } else {
-      circleEq = eqs[i];
-    }
-  }
-  if (circleEq && zEq) {
-    const F = `(${circleEq.lhs}) - (${circleEq.rhs})`;
-    const q = quadCoeffsXY(F);
-    if (q && q.isQuadratic && Math.abs(q.c20 - q.c02) < 1e-9 && q.c20 > EPS && Math.abs(q.c11) < 1e-9) {
-      const x0 = -q.c10 / (2 * q.c20);
-      const y0 = -q.c01 / (2 * q.c02);
-      const K = q.c20 * x0 * x0 + q.c02 * y0 * y0 - q.c00;
-      if (K > EPS) {
-        const r = Math.sqrt(K / q.c20);
-        const xExpr = x0 === 0 ? `${num(r)}*cos(t)` : `${num(x0)} + ${num(r)}*cos(t)`;
-        const yExpr = y0 === 0 ? `${num(r)}*sin(t)` : `${num(y0)} + ${num(r)}*sin(t)`;
-        let zExpr = subst(zEq.f, 'x', xExpr);
-        zExpr = subst(zExpr, 'y', yExpr);
-        const expr: ParamExpr = {
-          x: xExpr,
-          y: yExpr,
-          z: math.parse(zExpr).toString(),
-        };
-        return {
-          ok: true,
-          expr,
-          tMin: 0,
-          tMax: TAU,
-          dim: '3d',
-          cartesian: `${tex(circleEq.lhs)}=${tex(circleEq.rhs)},\\ z=${tex(zEq.f)}`,
-          param: paramTex(expr),
-          note: 'Intersección de un cilindro (o círculo) con una superficie z = g(x,y).',
-        };
+    const explicitEq = explicits[i];
+    if (explicitEq) {
+      const w = explicitEq.variable;
+      const circleEq = eqs[1 - i];
+
+      let u: 'x' | 'y' | 'z';
+      let v: 'x' | 'y' | 'z';
+      if (w === 'z') {
+        u = 'x';
+        v = 'y';
+      } else if (w === 'x') {
+        u = 'y';
+        v = 'z';
+      } else { // w === 'y'
+        u = 'x';
+        v = 'z';
+      }
+
+      const subLhs = subst(circleEq.lhs, w, explicitEq.f);
+      const subRhs = subst(circleEq.rhs, w, explicitEq.f);
+      const F = `(${subLhs}) - (${subRhs})`;
+
+      const q = quadCoeffs(F, u, v);
+      if (q && q.isQuadratic && Math.abs(q.c20 - q.c02) < 1e-9 && q.c20 > EPS && Math.abs(q.c11) < 1e-9) {
+        const u0 = -q.c10 / (2 * q.c20);
+        const v0 = -q.c01 / (2 * q.c02);
+        const K = q.c20 * u0 * u0 + q.c02 * v0 * v0 - q.c00;
+        if (K > EPS) {
+          const r = Math.sqrt(K / q.c20);
+          const uExpr = u0 === 0 ? `${num(r)}*cos(t)` : `${num(u0)} + ${num(r)}*cos(t)`;
+          const vExpr = v0 === 0 ? `${num(r)}*sin(t)` : `${num(v0)} + ${num(r)}*sin(t)`;
+
+          let wExpr = subst(explicitEq.f, u, uExpr);
+          wExpr = subst(wExpr, v, vExpr);
+          const wExprParsed = math.parse(wExpr).toString();
+
+          const expr: ParamExpr = { x: '', y: '', z: '' };
+          if (w === 'x') {
+            expr.x = wExprParsed;
+            expr.y = uExpr;
+            expr.z = vExpr;
+          } else if (w === 'y') {
+            expr.x = uExpr;
+            expr.y = wExprParsed;
+            expr.z = vExpr;
+          } else { // w === 'z'
+            expr.x = uExpr;
+            expr.y = vExpr;
+            expr.z = wExprParsed;
+          }
+
+          return {
+            ok: true,
+            expr,
+            tMin: 0,
+            tMax: TAU,
+            dim: '3d',
+            cartesian: `${tex(circleEq.lhs)}=${tex(circleEq.rhs)},\\ ${w}=${tex(explicitEq.f)}`,
+            param: paramTex(expr),
+            note: 'Intersección de un cilindro (o círculo) con una superficie.',
+          };
+        }
       }
     }
   }
 
   return {
     ok: false,
-    reason: 'No reconocí esta intersección. Soporto cilindro∩(z=g) y pares explícitos (y=f(x), z=g(x)). Usa el modo paramétrico para casos más generales.',
+    reason: 'No reconocí esta intersección. Soporto cilindro∩(superficie) y pares explícitos (y=f(x), z=g(x)). Usa el modo paramétrico para casos más generales.',
   };
 }
 
@@ -360,7 +385,7 @@ export function recognizeCartesian(input: string): RecognizeResult {
 
     // Implícita en x, y → cónica o recta.
     const F = `(${eq.lhs}) - (${eq.rhs})`;
-    const q = quadCoeffsXY(F);
+    const q = quadCoeffs(F, 'x', 'y');
     if (!q) return { ok: false, reason: 'No pude analizar la ecuación.' };
     if (!q.isQuadratic) {
       return { ok: false, reason: 'No reconozco esta forma implícita. Usa el modo paramétrico o escríbela como y = f(x).' };

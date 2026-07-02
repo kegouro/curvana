@@ -8,7 +8,7 @@ export function defaultState(): AppState {
     expr: { x: 'cos(t)', y: 'sin(t)', z: '0.3*t' },
     tMin: 0,
     tMax: 4 * Math.PI,
-    t: 4 * Math.PI,
+    t: 0,
     speed: 1,
     show: { tangent: true, frenet: false, scalar: false, vector: false },
     scalar: 'x^2 + y^2',

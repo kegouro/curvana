@@ -7,6 +7,8 @@ interface Plot {
   label: string;
   canvas: HTMLCanvasElement;
   values: number[];
+  w: number;
+  h: number;
 }
 
 const COLORS = ['#f87171', '#a3e635', '#38bdf8']; // x, y, z
@@ -29,8 +31,15 @@ export class ComponentPlots {
       const canvas = document.createElement('canvas');
       cell.append(title, canvas);
       this.el.appendChild(cell);
-      return { label, canvas, values: [] };
+      return { label, canvas, values: [], w: 0, h: 0 };
     });
+    
+    const ro = new ResizeObserver(() => {
+      this.updateSizes();
+      this.redraw();
+    });
+    ro.observe(this.el);
+    setTimeout(() => this.updateSizes(), 0);
   }
 
   setCurve(curve: Curve, dim: Dim): void {
@@ -58,13 +67,20 @@ export class ComponentPlots {
     for (let i = 0; i < this.plots.length; i++) this.draw(this.plots[i], COLORS[i]);
   }
 
+  private updateSizes(): void {
+    for (const p of this.plots) {
+      const rect = p.canvas.getBoundingClientRect();
+      p.w = Math.max(80, Math.floor(rect.width)) * devicePixelRatio;
+      p.h = Math.max(50, Math.floor(rect.height)) * devicePixelRatio;
+      p.canvas.width = p.w;
+      p.canvas.height = p.h;
+    }
+  }
+
   private draw(plot: Plot, color: string): void {
-    const { canvas, values } = plot;
-    const rect = canvas.getBoundingClientRect();
-    const w = (canvas.width = Math.max(80, Math.floor(rect.width)) * devicePixelRatio);
-    const h = (canvas.height = Math.max(50, Math.floor(rect.height)) * devicePixelRatio);
+    const { canvas, values, w, h } = plot;
     const ctx = canvas.getContext('2d');
-    if (!ctx || values.length === 0) return;
+    if (!ctx || values.length === 0 || w === 0 || h === 0) return;
 
     ctx.clearRect(0, 0, w, h);
     const finite = values.filter(Number.isFinite);

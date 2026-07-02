@@ -3,15 +3,16 @@
 import type { AppState, Dim, InputMode, ParamExpr, Readout, VectorExpr } from './core/types';
 import { defaultState, decodeState, encodeState } from './core/state';
 import { curveFromExpr, type Curve } from './core/curve';
-import { arcLength, curvature, frenetFrame } from './core/differential';
+import { arcLength, curvature, frenetFrame, createArcLengthInterpolator } from './core/differential';
 import {
   scalarFieldFromExpr,
   vectorFieldFromExpr,
-  lineIntegralScalar,
-  lineIntegralVector,
   type ScalarField,
   type VectorField,
+  createScalarIntegralInterpolator,
+  createVectorIntegralInterpolator,
 } from './core/fields';
+import type { IntegralInterpolator } from './core/interpolator';
 import { recognizeCartesian } from './core/cartesian';
 import { getLibraryCurve } from './core/library';
 import { ParseError, mathjs } from './core/parser';
@@ -23,6 +24,7 @@ import { ControlPanel } from './ui/controlPanel';
 import { ComponentPlots } from './ui/componentPlots';
 import { TransportBar } from './ui/transportBar';
 import { EquationView } from './ui/equationView';
+import { cleanOcrText } from './services/ocr/OcrProvider';
 import { TesseractProvider } from './services/ocr/TesseractProvider';
 
 const SWEEP_MS = 8000; // tiempo para recorrer todo el rango a velocidad 1×
@@ -42,8 +44,12 @@ export class App {
   private curve!: Curve;
   private scalarField: ScalarField | null = null;
   private vectorField: VectorField | null = null;
+  private arcLenInterp: IntegralInterpolator | null = null;
+  private scalarInterp: IntegralInterpolator | null = null;
+  private vectorInterp: IntegralInterpolator | null = null;
   private playing = false;
   private lastTs = 0;
+  private animId = 0;
 
   constructor(root: HTMLElement) {
     root.innerHTML = SKELETON;
@@ -74,12 +80,43 @@ export class App {
     root.querySelector('#share')!.addEventListener('click', () => this.share());
     root.querySelector('#png')!.addEventListener('click', () => this.savePng());
 
+    // Validate and handle initial hash loading state
+    let initialError: string | null = null;
+    try {
+      curveFromExpr(this.state.expr, this.state.tMin, this.state.tMax);
+    } catch (e) {
+      initialError = e instanceof ParseError ? e.message : 'Expresión inválida.';
+      const d = defaultState();
+      this.state.expr = d.expr;
+      this.state.tMin = d.tMin;
+      this.state.tMax = d.tMax;
+    }
+
+    if (!initialError) {
+      if (!Number.isFinite(this.state.tMin) || !Number.isFinite(this.state.tMax)) {
+        initialError = 'Límites de t inválidos.';
+        const d = defaultState();
+        this.state.tMin = d.tMin;
+        this.state.tMax = d.tMax;
+      } else if (this.state.tMin >= this.state.tMax) {
+        initialError = 't mín debe ser menor que t máx.';
+        const d = defaultState();
+        this.state.tMin = d.tMin;
+        this.state.tMax = d.tMax;
+      }
+    }
+
     this.rebuildFields();
     this.viewport.setDim(this.state.dim);
     this.rebuildCurve(true);
     this.refreshEquations();
     this.control.sync(this.state);
-    requestAnimationFrame((ts) => this.loop(ts));
+
+    if (initialError) {
+      this.control.setParametricError(initialError);
+    }
+
+    this.animId = requestAnimationFrame((ts) => this.loop(ts));
   }
 
   // ---- Cambios de entrada ----
@@ -131,7 +168,29 @@ export class App {
 
   private applyParametric(expr: ParamExpr, tMin: number, tMax: number): void {
     try {
+      // 1. Prioritize compilation errors: Try compilation first
       const curve = curveFromExpr(expr, tMin, tMax);
+
+      // 2. Validate bounds range and type
+      if (!Number.isFinite(tMin) || !Number.isFinite(tMax)) {
+        this.control.setParametricError('Límites de t inválidos.');
+        return;
+      }
+      if (tMin >= tMax) {
+        this.playing = false; // Pause animation
+        this.control.setParametricError('t mín debe ser menor que t máx.');
+        if (tMin === tMax) {
+          this.state.expr = expr;
+          this.state.tMin = tMin;
+          this.state.tMax = tMax;
+          this.curve = curve;
+          this.rebuildCurve(true);
+          this.equations.render(null, paramTex(expr, this.state.dim));
+        }
+        return;
+      }
+
+      // 3. Apply state and rebuild only if valid
       this.state.expr = expr;
       this.state.tMin = tMin;
       this.state.tMax = tMax;
@@ -172,13 +231,16 @@ export class App {
   private async runOcr(file: File): Promise<void> {
     this.control.setOcrStatus('Reconociendo imagen… (puede tardar unos segundos)');
     try {
-      const text = await this.ocr.recognize(file, (pct) =>
+      const rawText = await this.ocr.recognize(file, (pct) =>
         this.control.setOcrStatus(`Reconociendo… ${pct}%`),
       );
+      if (!rawText || rawText.trim() === '') throw new Error('Empty text');
+      const cleanedText = cleanOcrText(rawText);
+      if (!cleanedText) throw new Error('Empty text after clean');
       this.state.mode = 'cartesian';
-      this.state.cartesianInput = text;
+      this.state.cartesianInput = cleanedText;
       this.control.sync(this.state);
-      this.control.setOcrStatus(`Detecté: "${text}". Revísalo y pulsa Parametrizar.`);
+      this.control.setOcrStatus(`Detecté: "${cleanedText}". Revísalo y pulsa Parametrizar.`);
     } catch {
       this.control.setOcrStatus('No pude leer la imagen. Prueba con una más nítida.');
     }
@@ -201,18 +263,29 @@ export class App {
   private rebuildFields(): void {
     try {
       this.scalarField = scalarFieldFromExpr(this.state.scalar);
-    } catch {
+      this.control.setScalarError(null);
+      this.scalarInterp = this.curve ? createScalarIntegralInterpolator(this.curve, this.scalarField) : null;
+    } catch (e) {
       this.scalarField = null;
+      this.scalarInterp = null;
+      this.control.setScalarError(e instanceof ParseError ? e.message : 'Error en campo escalar.');
     }
     try {
       this.vectorField = vectorFieldFromExpr(this.state.vector);
-    } catch {
+      this.control.setVectorError(null);
+      this.vectorInterp = this.curve ? createVectorIntegralInterpolator(this.curve, this.vectorField) : null;
+    } catch (e) {
       this.vectorField = null;
+      this.vectorInterp = null;
+      this.control.setVectorError(e instanceof ParseError ? e.message : 'Error en campo vectorial.');
     }
   }
 
   private rebuildCurve(resetCamera: boolean): void {
     this.curve = curveFromExpr(this.state.expr, this.state.tMin, this.state.tMax);
+    this.arcLenInterp = createArcLengthInterpolator(this.curve);
+    if (this.scalarField) this.scalarInterp = createScalarIntegralInterpolator(this.curve, this.scalarField);
+    if (this.vectorField) this.vectorInterp = createVectorIntegralInterpolator(this.curve, this.vectorField);
     this.state.t = Math.min(Math.max(this.state.t, this.state.tMin), this.state.tMax);
     this.curveView.setCurve(this.curve, this.state.show.scalar ? this.scalarField : null);
     this.components.setCurve(this.curve, this.state.dim);
@@ -268,15 +341,15 @@ export class App {
     return {
       point,
       t,
-      arcLength: arcLength(this.curve, t),
+      arcLength: this.arcLenInterp ? this.arcLenInterp.eval(t) : arcLength(this.curve, t),
       curvature: curvature(this.curve, t),
       scalarIntegral:
-        this.state.show.scalar && this.scalarField
-          ? lineIntegralScalar(this.curve, this.scalarField, t)
+        this.state.show.scalar && this.scalarInterp
+          ? this.scalarInterp.eval(t)
           : null,
       vectorIntegral:
-        this.state.show.vector && this.vectorField
-          ? lineIntegralVector(this.curve, this.vectorField, t)
+        this.state.show.vector && this.vectorInterp
+          ? this.vectorInterp.eval(t)
           : null,
     };
   }
@@ -284,6 +357,10 @@ export class App {
   // ---- Acciones globales ----
 
   private share(): void {
+    if (this.control.hasError()) {
+      this.flash('#share', 'Corrija errores');
+      return;
+    }
     const url = `${location.origin}${location.pathname}#${encodeState(this.state)}`;
     history.replaceState(null, '', url);
     navigator.clipboard?.writeText(url).then(
@@ -324,7 +401,11 @@ export class App {
     }
 
     this.viewport.render();
-    requestAnimationFrame((next) => this.loop(next));
+    this.animId = requestAnimationFrame((next) => this.loop(next));
+  }
+
+  destroy(): void {
+    cancelAnimationFrame(this.animId);
   }
 }
 

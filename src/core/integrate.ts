@@ -19,3 +19,4 @@ export function integrate(g: (t: number) => number, a: number, b: number, n = 40
   }
   return (h / 3) * sum;
 }
+

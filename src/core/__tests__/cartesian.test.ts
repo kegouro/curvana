@@ -77,4 +77,57 @@ describe('reconocedor de cartesianas', () => {
     const r = recognizeCartesian('x^2 + y^2');
     expect(r.ok).toBe(false);
   });
+
+  it('intersección de cilindro yz con plano x: y²+z²=4, x=3', () => {
+    const r = ok('y^2 + z^2 = 4, x = 3');
+    const p = evalAt(r, 0);
+    expect(p[0]).toBeCloseTo(3, 6);
+    expect(p[1]).toBeCloseTo(2, 6);
+    expect(p[2]).toBeCloseTo(0, 6);
+    expect(r.dim).toBe('3d');
+  });
+
+  it('intersección de cilindro xz con plano y: x²+z²=9, y=1', () => {
+    const r = ok('x^2 + z^2 = 9, y = 1');
+    const p = evalAt(r, 0);
+    expect(p[0]).toBeCloseTo(3, 6);
+    expect(p[1]).toBeCloseTo(1, 6);
+    expect(p[2]).toBeCloseTo(0, 6);
+    expect(r.dim).toBe('3d');
+  });
+
+  it('intersección de esfera con plano z=2: x²+y²+z²=9, z=2', () => {
+    const r = ok('x^2 + y^2 + z^2 = 9, z = 2');
+    const p = evalAt(r, 0);
+    const expectedRadius = Math.sqrt(5);
+    expect(p[0]).toBeCloseTo(expectedRadius, 6);
+    expect(p[1]).toBeCloseTo(0, 6);
+    expect(p[2]).toBeCloseTo(2, 6);
+    expect(r.dim).toBe('3d');
+  });
+
+  it('insensibilidad a mayúsculas/minúsculas en reconocedor', () => {
+    const r = ok('X^2 + Y^2 = 9');
+    const p = evalAt(r, 0);
+    expect(p[0]).toBeCloseTo(3, 6);
+    expect(p[1]).toBeCloseTo(0, 6);
+  });
+
+  it('separa ecuaciones por espacios x^2+y^2=9 z=3', () => {
+    const r = ok('x^2+y^2=9 z=3');
+    const p = evalAt(r, 0);
+    expect(p[0]).toBeCloseTo(3, 6);
+    expect(p[1]).toBeCloseTo(0, 6);
+    expect(p[2]).toBeCloseTo(3, 6);
+    expect(r.dim).toBe('3d');
+  });
+
+  it('separa ecuaciones por múltiples espacios con otros delimitadores y = x^2 z = 4', () => {
+    const r = ok('y = x^2 z = 4');
+    const p = evalAt(r, 2);
+    expect(p[0]).toBeCloseTo(2, 6);
+    expect(p[1]).toBeCloseTo(4, 6);
+    expect(p[2]).toBeCloseTo(4, 6);
+    expect(r.dim).toBe('3d');
+  });
 });

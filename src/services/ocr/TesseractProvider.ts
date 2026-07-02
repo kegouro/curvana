@@ -12,6 +12,10 @@ export class TesseractProvider implements OcrProvider {
         }
       },
     });
-    return cleanOcrText(data.text);
+    const cleaned = cleanOcrText(data.text);
+    if (!cleaned) {
+      throw new Error('Cleaned OCR text is empty');
+    }
+    return cleaned;
   }
 }

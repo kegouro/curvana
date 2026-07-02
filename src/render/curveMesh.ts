@@ -50,9 +50,9 @@ export class CurveView {
       const t = tMin + ((tMax - tMin) * i) / this.samples;
       const p = curve.eval(t);
       const v = new THREE.Vector3(
-        Number.isFinite(p[0]) ? p[0] : 0,
-        Number.isFinite(p[1]) ? p[1] : 0,
-        Number.isFinite(p[2]) ? p[2] : 0,
+        Number.isFinite(p[0]) ? p[0] : NaN,
+        Number.isFinite(p[1]) ? p[1] : NaN,
+        Number.isFinite(p[2]) ? p[2] : NaN,
       );
       this.points.push(v);
       if (scalar) {

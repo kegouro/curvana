@@ -7,5 +7,10 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    environmentMatchGlobs: [
+      ['src/e2e/**/*.test.ts', 'jsdom'],
+    ],
+    setupFiles: ['src/e2e/setup.ts'],
   },
 });
+

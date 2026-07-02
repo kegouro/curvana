@@ -27,7 +27,8 @@ export function frenetFrame(curve: Curve, t: number): Frame {
   const aPerp = V.sub(a, V.scale(T, V.dot(a, T)));
   const N = V.normalize(aPerp);
   const B = V.cross(T, N);
-  return { T, N, B };
+  const safe = (vec: Vec3): Vec3 => (Number.isFinite(vec[0]) && Number.isFinite(vec[1]) && Number.isFinite(vec[2]) ? vec : [0, 0, 0]);
+  return { T: safe(T), N: safe(N), B: safe(B) };
 }
 
 /** Curvatura κ(t) = |r'(t) × r''(t)| / |r'(t)|³. */
@@ -36,10 +37,16 @@ export function curvature(curve: Curve, t: number): number {
   const a = curve.acceleration(t);
   const speed = V.norm(v);
   if (speed === 0 || !Number.isFinite(speed)) return 0;
-  return V.norm(V.cross(v, a)) / speed ** 3;
+  const k = V.norm(V.cross(v, a)) / speed ** 3;
+  return Number.isFinite(k) ? k : 0;
 }
 
 /** Longitud de arco acumulada s(t) = ∫_from^t |r'(τ)| dτ. */
 export function arcLength(curve: Curve, t: number, from: number = curve.tMin): number {
   return integrate((tau) => V.norm(curve.velocity(tau)), from, t);
+}
+
+import { IntegralInterpolator } from './interpolator';
+export function createArcLengthInterpolator(curve: Curve): IntegralInterpolator {
+  return new IntegralInterpolator(curve.tMin, curve.tMax, (tau) => V.norm(curve.velocity(tau)));
 }

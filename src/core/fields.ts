@@ -58,3 +58,13 @@ export function lineIntegralVector(
 ): number {
   return integrate((tau) => V.dot(field.eval(curve.eval(tau)), curve.velocity(tau)), from, t);
 }
+
+import { IntegralInterpolator } from './interpolator';
+
+export function createScalarIntegralInterpolator(curve: Curve, f: ScalarField): IntegralInterpolator {
+  return new IntegralInterpolator(curve.tMin, curve.tMax, (tau) => f.eval(curve.eval(tau)) * V.norm(curve.velocity(tau)));
+}
+
+export function createVectorIntegralInterpolator(curve: Curve, field: VectorField): IntegralInterpolator {
+  return new IntegralInterpolator(curve.tMin, curve.tMax, (tau) => V.dot(field.eval(curve.eval(tau)), curve.velocity(tau)));
+}

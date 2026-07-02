@@ -101,14 +101,19 @@ export class ControlPanel {
   }
 
   private submitParam(): void {
+    const tMinVal = this.$<HTMLInputElement>('#tmin').value.trim();
+    const tMaxVal = this.$<HTMLInputElement>('#tmax').value.trim();
+    const tMin = tMinVal === '' ? NaN : Number(tMinVal);
+    const tMax = tMaxVal === '' ? NaN : Number(tMaxVal);
+
     this.h.onParametricSubmit(
       {
         x: this.$<HTMLInputElement>('#px').value,
         y: this.$<HTMLInputElement>('#py').value,
         z: this.$<HTMLInputElement>('#pz').value,
       },
-      Number(this.$<HTMLInputElement>('#tmin').value),
-      Number(this.$<HTMLInputElement>('#tmax').value),
+      tMin,
+      tMax,
     );
   }
 
@@ -154,12 +159,29 @@ export class ControlPanel {
     el.className = `msg ${msg ? 'error' : 'none'}`;
   }
 
+  setScalarError(msg: string | null): void {
+    const el = this.$('#scalar-msg');
+    el.textContent = msg ?? '';
+    el.className = `msg ${msg ? 'error' : 'none'}`;
+  }
+
+  setVectorError(msg: string | null): void {
+    const el = this.$('#vector-msg');
+    el.textContent = msg ?? '';
+    el.className = `msg ${msg ? 'error' : 'none'}`;
+  }
+
+  hasError(): boolean {
+    return !!this.el.querySelector('.msg.error');
+  }
+
   setOcrStatus(msg: string): void {
     this.$('#ocr-status').textContent = msg;
   }
 }
 
 function trim(v: number): string {
+  if (Number.isNaN(v)) return '';
   return Number.isInteger(v) ? String(v) : v.toFixed(4);
 }
 
@@ -230,6 +252,7 @@ const TEMPLATE = (libOptions: string): string => `
       <input id="scalar-expr" type="text" placeholder="ej: x^2 + y^2" />
       <button id="scalar-go">Aplicar</button>
     </div>
+    <div id="scalar-msg" class="msg none"></div>
 
     <label class="check"><input id="tg-vector" type="checkbox" /> Campo vectorial F(x,y,z)</label>
     <div class="subfield vec">
@@ -238,6 +261,7 @@ const TEMPLATE = (libOptions: string): string => `
       <input id="fz" type="text" placeholder="Fz" />
       <button id="vector-go">Aplicar</button>
     </div>
+    <div id="vector-msg" class="msg none"></div>
   </div>
 
   <div class="signature">Hecho por <b>José Labarca</b> · para Mate 023</div>
