@@ -6,6 +6,10 @@
 
 # Curvana: Simulador Interactivo de Parametrizaciones de Curvas en 2D y 3D para Cálculo Multivariable
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21303284.svg)](https://doi.org/10.5281/zenodo.21303284)
+[![Release](https://img.shields.io/github/v/release/kegouro/curvana?style=flat-square)](https://github.com/kegouro/curvana/releases/tag/v0.1.2)
+[![Live](https://img.shields.io/badge/demo-kegouro.github.io%2Fcurvana-7c5cff?style=flat-square)](https://kegouro.github.io/curvana/)
+
 Curvana es una plataforma educativa y de simulación científica orientada a la visualización rigurosa e interactiva de parametrizaciones de curvas, geometría diferencial clásica e integrales de línea de campos tanto escalares como vectoriales. Concebida como una herramienta pedagógica para la enseñanza de Cálculo Multivariable (particularmente en cursos universitarios de ingeniería y ciencias físicas), la herramienta permite a estudiantes y docentes analizar de forma dinámica la interconexión entre la descripción algebraica de una curva, sus propiedades geométricas intrínsecas y el comportamiento de campos físicos o matemáticos definidos sobre su trayectoria.
 
 ---
